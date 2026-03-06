@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Josh's Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B3A5C;
+    --navy-light: #2A5580;
+    --navy-dark: #0F2440;
+    --gold: #D4A843;
+    --gold-light: #E8C76A;
+    --bg: #F4F1EC;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --text-muted: #6B7280;
+    --border: #D1CCC4;
+    --high: #DC4545;
+    --high-bg: #FEF2F2;
+    --med: #D97706;
+    --med-bg: #FFFBEB;
+    --low: #16A34A;
+    --low-bg: #F0FDF4;
+    --success: #16A34A;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 0;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-light) 100%);
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(212,168,67,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .header h1 span {
+    color: var(--gold);
+  }
+
+  .header p {
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+    margin-top: 4px;
+    font-style: italic;
+    position: relative;
+  }
+
+  .mode-toggle {
+    display: flex;
+    margin: 20px 16px 0;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+
+  .mode-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 9px;
+    transition: all 0.25s ease;
+  }
+
+  .mode-btn.active {
+    background: var(--navy);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(27,58,92,0.3);
+  }
+
+  .form-container {
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .field-group {
+    margin-bottom: 16px;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+
+  .field-group input,
+  .field-group textarea,
+  .field-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--card);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .field-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  .field-group input:focus,
+  .field-group textarea:focus,
+  .field-group select:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(27,58,92,0.12);
+  }
+
+  .field-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .priority-pills {
+    display: flex;
+    gap: 8px;
+  }
+
+  .priority-pill {
+    flex: 1;
+    padding: 12px 8px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+
+  .priority-pill[data-priority="High"] { color: var(--high); }
+  .priority-pill[data-priority="Medium"] { color: var(--med); }
+  .priority-pill[data-priority="Low"] { color: var(--low); }
+
+  .priority-pill.selected[data-priority="High"] {
+    background: var(--high-bg);
+    border-color: var(--high);
+  }
+  .priority-pill.selected[data-priority="Medium"] {
+    background: var(--med-bg);
+    border-color: var(--med);
+  }
+  .priority-pill.selected[data-priority="Low"] {
+    background: var(--low-bg);
+    border-color: var(--low);
+  }
+
+  .role-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .role-chip {
+    padding: 10px 16px;
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    background: var(--card);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .role-chip.selected {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+  }
+
+  .detail-fields {
+    display: none;
+    animation: slideDown 0.3s ease;
+  }
+
+  .detail-fields.visible { display: block; }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(27,58,92,0.35);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  .submit-btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  .submit-btn.success {
+    background: linear-gradient(135deg, var(--success) 0%, #15803d 100%);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--navy-dark);
+    color: #fff;
+    padding: 16px 28px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast .check {
+    width: 20px;
+    height: 20px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .setup-banner {
+    background: var(--med-bg);
+    border: 1.5px solid #F59E0B;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #92400E;
+  }
+
+  .setup-banner code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,0,0,0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    word-break: break-all;
+  }
+
+  .setup-banner a {
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .brain-dump-area {
+    min-height: 150px;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0 16px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .recent-tasks {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .recent-tasks h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .recent-task-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .recent-task-item .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .recent-task-item .task-text {
+    font-size: 14px;
+    flex: 1;
+  }
+
+  .recent-task-item .task-role {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Command <span>Center</span></h1>
+  <p>Brain dump it. Route it. Done.</p>
+</div>
+
+<div class="mode-toggle">
+  <button class="mode-btn active" onclick="setMode('quick')">Quick Add</button>
+  <button class="mode-btn" onclick="setMode('detailed')">Detailed</button>
+  <button class="mode-btn" onclick="setMode('braindump')">Brain Dump</button>
+</div>
+
+<div class="form-container">
+
+  <div class="setup-banner" id="setupBanner">
+    <strong>One-time setup needed:</strong> Paste your Web App URL below to connect this form to your Google Sheet. See the setup instructions doc for how to get this URL.<br><br>
+    <input type="text" id="webAppUrl" placeholder="Paste your Google Apps Script Web App URL here..." 
+           style="width:100%; padding:10px; border:1.5px solid #D1CCC4; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; margin-top:8px;"
+           oninput="saveWebAppUrl()">
+    <div style="margin-top:8px; font-size:12px;">This saves to your browser so you only do it once.</div>
+  </div>
+
+  <!-- QUICK ADD MODE -->
+  <div id="quickMode">
+    <div class="field-group">
+      <label>Role</label>
+      <div class="role-chips" id="roleChips">
+        <div class="role-chip" onclick="selectRole(this)">Providence</div>
+        <div class="role-chip" onclick="selectRole(this)">Cherokee Connect</div>
+        <div class="role-chip" onclick="selectRole(this)">Football - Feeder</div>
+        <div class="role-chip" onclick="selectRole(this)">Football - 5th Grade</div>
+        <div class="role-chip" onclick="selectRole(this)">Travel Baseball</div>
+        <div class="role-chip" onclick="selectRole(this)">Personal</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Task</label>
+      <input type="text" id="taskInput" placeholder="What needs to get done?">
+    </div>
+
+    <div class="field-group">
+      <label>Priority</label>
+      <div class="priority-pills">
+        <div class="priority-pill" data-priority="High" onclick="selectPriority(this)">High</div>
+        <div class="priority-pill selected" data-priority="Medium" onclick="selectPriority(this)">Medium</div>
+        <div class="priority-pill" data-priority="Low" onclick="selectPriority(this)">Low</div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Notes <span style="font-weight:400; color:var(--text-muted);">(optional)</span></label>
+      <textarea id="notesInput" placeholder="Any context, details, or reminders..."></textarea>
+    </div>
+
+    <!-- DETAILED FIELDS -->
+    <div class="detail-fields" id="detailFields">
+      <div class="divider">Additional Details</div>
+      <div class="row-2">
+        <div class="field-group">
+          <label>Due Date</label>
+          <input type="date" id="dueDateInput">
+        </div>
+        <div class="field-group">
+          <label>Delegated To</label>
+          <input type="text" id="delegatedInput" placeholder="Name">
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Route To</label>
+        <select id="routedInput">
+          <option value="">-- Select --</option>
+          <option value="Outlook Calendar">Outlook Calendar</option>
+          <option value="Outlook Email">Outlook Email</option>
+          <option value="GroupMe">GroupMe</option>
+          <option value="Group Text">Group Text</option>
+          <option value="AgencyZoom Task">AgencyZoom Task</option>
+          <option value="HawkSoft Task">HawkSoft Task</option>
+          <option value="Cherokee Connect Post">Cherokee Connect Post</option>
+          <option value="N/A">N/A</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitTask()">
+      Add Task
+    </button>
+  </div>
+
+  <!-- BRAIN DUMP MODE -->
+  <div id="brainDumpMode" style="display:none;">
+    <div class="field-group">
+      <label>Dump everything here</label>
+      <textarea id="brainDumpInput" class="brain-dump-area" placeholder="Just type everything on your mind. Tasks, reminders, ideas, follow-ups, whatever. Example:
+
+Need to call the Travelers rep about Smith renewal tomorrow. Also remind me to post in Cherokee Connect about Friday's event. Mike is supposed to confirm the field reservation -- follow up with him. Book the hotel for Gatlinburg tournament, check Hampton Inn first..."></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Primary Role <span style="font-weight:400; color:var(--text-muted);">(if most items are for one role)</span></label>
+      <div class="role-chips" id="brainDumpRoleChips">
+        <div class="role-chip" onclick="selectBrainDumpRole(this)">Providence</div>
+        <div class="role-chip" onclick="selectBrainDumpRole(this)">Cherokee Connect</div>
+        <div class="role-chip" onclick="selectBrainDumpRole(this)">Football</div>
+        <div class="role-chip" onclick="selectBrainDumpRole(this)">Baseball</div>
+        <div class="role-chip" onclick="selectBrainDumpRole(this)">Mixed / Multiple</div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="brainDumpBtn" onclick="submitBrainDump()">
+      Send to Claude for Processing
+    </button>
+
+    <div style="margin-top:12px; font-size:13px; color:var(--text-muted); text-align:center; line-height:1.5;">
+      This will copy your brain dump to clipboard formatted for Claude.<br>
+      Paste it in the Claude app and I'll sort everything out.
+    </div>
+  </div>
+
+  <!-- RECENT SUBMISSIONS -->
+  <div class="recent-tasks" id="recentTasks" style="display:none;">
+    <h3>Recently Added</h3>
+    <div id="recentList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="check">&#10003;</div>
+  <span id="toastText">Task added to your sheet!</span>
+</div>
+
+<script>
+  let currentMode = 'quick';
+  let selectedRole = '';
+  let selectedPriority = 'Medium';
+  let brainDumpRole = '';
+  let recentItems = [];
+
+  // Load saved Web App URL
+  const savedUrl = localStorage.getItem('commandCenterWebAppUrl');
+  if (savedUrl) {
+    document.getElementById('webAppUrl').value = savedUrl;
+    document.getElementById('setupBanner').style.display = 'none';
+  }
+
+  function saveWebAppUrl() {
+    const url = document.getElementById('webAppUrl').value.trim();
+    if (url) {
+      localStorage.setItem('commandCenterWebAppUrl', url);
+      if (url.startsWith('https://script.google.com')) {
+        document.getElementById('setupBanner').style.display = 'none';
+        showToast('Connected to your Google Sheet!');
+      }
+    }
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', 
+        (mode === 'quick' && i === 0) || 
+        (mode === 'detailed' && i === 1) || 
+        (mode === 'braindump' && i === 2)
+      );
+    });
+
+    document.getElementById('quickMode').style.display = (mode === 'quick' || mode === 'detailed') ? 'block' : 'none';
+    document.getElementById('brainDumpMode').style.display = mode === 'braindump' ? 'block' : 'none';
+    document.getElementById('detailFields').classList.toggle('visible', mode === 'detailed');
+
+    if (mode === 'quick' || mode === 'detailed') {
+      document.getElementById('submitBtn').textContent = 'Add Task';
+    }
+  }
+
+  function selectRole(el) {
+    document.querySelectorAll('#roleChips .role-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedRole = el.textContent;
+  }
+
+  function selectBrainDumpRole(el) {
+    document.querySelectorAll('#brainDumpRoleChips .role-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    brainDumpRole = el.textContent;
+  }
+
+  function selectPriority(el) {
+    document.querySelectorAll('.priority-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPriority = el.dataset.priority;
+  }
+
+  // Map short role names to full sheet names
+  function getFullRoleName(role) {
+    const map = {
+      'Providence': 'Providence Insurance',
+      'Cherokee Connect': 'Cherokee Connect',
+      'Football - Feeder': 'Football - Feeder Program',
+      'Football - 5th Grade': 'Football - 5th Grade',
+      'Travel Baseball': 'Travel Baseball',
+      'Personal': 'Personal'
+    };
+    return map[role] || role;
+  }
+
+  async function submitTask() {
+    const task = document.getElementById('taskInput').value.trim();
+    if (!task) {
+      document.getElementById('taskInput').style.borderColor = '#DC4545';
+      document.getElementById('taskInput').focus();
+      return;
+    }
+    if (!selectedRole) {
+      showToast('Pick a role first');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading');
+    btn.textContent = 'Adding...';
+
+    const today = new Date();
+    const dateStr = (today.getMonth()+1) + '/' + today.getDate() + '/' + today.getFullYear();
+
+    const data = {
+      dateAdded: dateStr,
+      role: getFullRoleName(selectedRole),
+      task: task,
+      dueDate: document.getElementById('dueDateInput')?.value || '',
+      priority: selectedPriority,
+      status: 'To Do',
+      delegatedTo: document.getElementById('delegatedInput')?.value?.trim() || '',
+      routedTo: document.getElementById('routedInput')?.value || '',
+      notes: document.getElementById('notesInput').value.trim()
+    };
+
+    // Format due date if provided
+    if (data.dueDate) {
+      const d = new Date(data.dueDate + 'T12:00:00');
+      data.dueDate = (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
+    }
+
+    const webAppUrl = localStorage.getItem('commandCenterWebAppUrl');
+
+    if (webAppUrl) {
+      try {
+        await fetch(webAppUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        btn.classList.remove('loading');
+        btn.classList.add('success');
+        btn.textContent = 'Added!';
+        showToast('Task added to your sheet!');
+        addToRecent(data);
+        resetForm();
+        setTimeout(() => {
+          btn.classList.remove('success');
+          btn.textContent = 'Add Task';
+        }, 2000);
+      } catch(e) {
+        btn.classList.remove('loading');
+        btn.textContent = 'Add Task';
+        showToast('Error connecting. Check your Web App URL.');
+      }
+    } else {
+      // No URL configured, copy to clipboard
+      btn.classList.remove('loading');
+      const text = `Date: ${data.dateAdded}\nRole: ${data.role}\nTask: ${data.task}\nDue: ${data.dueDate || 'N/A'}\nPriority: ${data.priority}\nDelegated To: ${data.delegatedTo || 'N/A'}\nRouted To: ${data.routedTo || 'N/A'}\nNotes: ${data.notes || 'N/A'}`;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('success');
+        btn.textContent = 'Copied!';
+        showToast('Copied! Paste into your sheet. Or set up the Web App URL for auto-add.');
+        addToRecent(data);
+        resetForm();
+        setTimeout(() => {
+          btn.classList.remove('success');
+          btn.textContent = 'Add Task';
+        }, 2500);
+      });
+    }
+  }
+
+  function submitBrainDump() {
+    const dump = document.getElementById('brainDumpInput').value.trim();
+    if (!dump) {
+      document.getElementById('brainDumpInput').style.borderColor = '#DC4545';
+      document.getElementById('brainDumpInput').focus();
+      return;
+    }
+
+    const btn = document.getElementById('brainDumpBtn');
+    const roleContext = brainDumpRole ? ` (Primary role: ${brainDumpRole})` : '';
+
+    const formatted = `BRAIN DUMP FOR PROCESSING${roleContext}:\n\n${dump}\n\n---\nPlease pull out all tasks, reminders, follow-ups, and draft any messages needed. Add tasks to my Command Center Google Sheet and create .ics files for any calendar reminders.`;
+
+    navigator.clipboard.writeText(formatted).then(() => {
+      btn.classList.add('success');
+      btn.textContent = 'Copied to Clipboard!';
+      showToast('Now paste this into Claude');
+      setTimeout(() => {
+        btn.classList.remove('success');
+        btn.textContent = 'Send to Claude for Processing';
+        document.getElementById('brainDumpInput').value = '';
+      }, 3000);
+    });
+  }
+
+  function resetForm() {
+    document.getElementById('taskInput').value = '';
+    document.getElementById('taskInput').style.borderColor = '';
+    document.getElementById('notesInput').value = '';
+    if (document.getElementById('dueDateInput')) document.getElementById('dueDateInput').value = '';
+    if (document.getElementById('delegatedInput')) document.getElementById('delegatedInput').value = '';
+    if (document.getElementById('routedInput')) document.getElementById('routedInput').value = '';
+  }
+
+  function addToRecent(data) {
+    recentItems.unshift(data);
+    if (recentItems.length > 5) recentItems.pop();
+    renderRecent();
+  }
+
+  function renderRecent() {
+    const container = document.getElementById('recentTasks');
+    const list = document.getElementById('recentList');
+    container.style.display = 'block';
+
+    const priorityColors = { High: '#DC4545', Medium: '#D97706', Low: '#16A34A' };
+
+    list.innerHTML = recentItems.map(item => `
+      <div class="recent-task-item">
+        <div class="dot" style="background:${priorityColors[item.priority] || '#999'}"></div>
+        <div style="flex:1">
+          <div class="task-text">${item.task}</div>
+          <div class="task-role">${item.role}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function showToast(text) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = text;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 3000);
+  }
+</script>
+</body>
+</html>
